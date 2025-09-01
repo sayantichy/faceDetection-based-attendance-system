@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}{{ course.code }} - {{ course.title }}{% endblock %}
+{% block content %}
+<div class="bg-white rounded-2xl shadow p-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <div class="text-gray-500">{{ course.code }}</div>
+      <h1 class="text-2xl font-bold">{{ course.title }}</h1>
+    </div>
+    <div class="flex gap-2">
+      <form action="{{ url_for('courses.train_model') }}" method="post">
+        <button class="btn btn-outline-primary">Train Model</button>
+      </form>
+      <a class="btn btn-primary" href="{{ url_for('attendance.start') }}">Start Attendance</a>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+  <div class="bg-white rounded-2xl shadow p-6">
+    <h2 class="text-lg font-semibold mb-2">Sections</h2>
+    <ul class="list-group mb-3">
+      {% for s in sections %}
+      <li class="list-group-item d-flex justify-content-between">
+        <span>{{ s.name }}</span>
+        <span class="text-gray-500">ID: {{ s.id }}</span>
+      </li>
+      {% else %}
+      <li class="list-group-item">No sections yet.</li>
+      {% endfor %}
+    </ul>
+    <form action="{{ url_for('courses.create_section', course_id=course.id) }}" method="post" class="flex gap-2">
+      <input name="name" class="form-control" placeholder="Section A">
+      <button class="btn btn-success">+ Add Section</button>
+    </form>
+  </div>
+
+  <div class="bg-white rounded-2xl shadow p-6">
+    <h2 class="text-lg font-semibold mb-2">Attendance Overview</h2>
+    <canvas id="courseChart" height="140"></canvas>
+    <script>
+      const chartData = {{ chart|tojson }};
+      renderLineChart("courseChart", chartData.labels, chartData.percentages);
+    </script>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+  <div class="bg-white rounded-2xl shadow p-6">
+    <h2 class="text-lg font-semibold mb-3">Enroll Student (Inline)</h2>
+    <form method="post" action="{{ url_for('courses.enroll_student_inline', course_id=course.id) }}" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div>
+        <label class="form-label">Student ID</label>
+        <input name="student_code" class="form-control" placeholder="s1001">
+      </div>
+      <div>
+        <label class="form-label">Name</label>
+        <input name="name" class="form-control" placeholder="Alice">
+      </div>
+      <div>
+        <label class="form-label">Section ID (optional)</label>
+        <input name="section_id" class="form-control" placeholder="e.g. 1">
+      </div>
+      <div class="md:col-span-3">
+        <button class="btn btn-primary">Enroll</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="bg-white rounded-2xl shadow p-6">
+    <h2 class="text-lg font-semibold mb-3">Upload Photos for a Student</h2>
+    <form id="uploadForm" method="post" enctype="multipart/form-data"
+          data-base="{{ url_for('courses.upload_student_photos', course_id=course.id, student_id=0) }}">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div class="md:col-span-1">
+          <label class="form-label">Choose Student</label>
+          <select id="studentSelect" class="form-select">
+            {% for s in students %}
+            <option value="{{ s.id }}">{{ s.name }} ({{ s.student_code }})</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="md:col-span-2">
+          <label class="form-label">Photos (you can select multiple)</label>
+          <input id="photoInput" name="photos" type="file" class="form-control" accept=".png,.jpg,.jpeg" multiple>
+        </div>
+        <div class="md:col-span-3">
+          <button id="uploadBtn" class="btn btn-outline-primary" {% if not students %}disabled{% endif %}>Upload</button>
+        </div>
+      </div>
+    </form>
+    <script>
+      (function() {
+        const form = document.getElementById('uploadForm');
+        const selectEl = document.getElementById('studentSelect');
+        function updateAction() {
+          const base = form.getAttribute('data-base');
+          form.action = base.replace(/\/students\/\d+\/upload$/, `/students/${selectEl.value}/upload`);
+        }
+        updateAction();
+        selectEl.addEventListener('change', updateAction);
+      })();
+    </script>
+    <p class="text-sm text-gray-500 mt-2">Upload 3–20 clear images per student for better accuracy (front/left/right).</p>
+  </div>
+</div>
+
+<div class="bg-white rounded-2xl shadow p-6 mt-4">
+  <h2 class="text-lg font-semibold mb-2">Students</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+    {% for s in students %}
+    <div class="block p-4 rounded-xl border hover:shadow">
+      <div class="font-medium">{{ s.name }}</div>
+      <div class="text-gray-500 text-sm">{{ s.student_code }}</div>
+      <div class="mt-3 flex gap-2">
+        <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('courses.student_detail', student_id=s.id) }}">Profile</a>
+        <a class="btn btn-sm btn-outline-primary" href="{{ url_for('courses.capture_faces', student_id=s.id) }}">Capture (3‑shot)</a>
+      </div>
+    </div>
+    {% else %}
+    <div>No students enrolled.</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

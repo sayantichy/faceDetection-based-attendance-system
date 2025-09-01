@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Enroll Student{% endblock %}
+{% block content %}
+<div class="max-w-2xl bg-white rounded-2xl shadow p-6 mx-auto">
+  <h1 class="text-2xl font-bold mb-4">Enroll Student</h1>
+  <form method="post">
+    <div class="mb-3">
+      <label class="form-label">Student ID</label>
+      <input name="student_code" class="form-control" placeholder="s1001">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Name</label>
+      <input name="name" class="form-control" placeholder="Alice">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Course</label>
+      <select name="course_id" class="form-select">
+        {% for c in courses %}
+        <option value="{{ c.id }}">{{ c.code }} — {{ c.title }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Section (optional)</label>
+      <input name="section_id" class="form-control" placeholder="Section id">
+    </div>
+    <button class="btn btn-primary">Enroll</button>
+  </form>
+</div>
+{% endblock %}

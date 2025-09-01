@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Capture Faces{% endblock %}
+{% block content %}
+<div class="max-w-xl bg-white rounded-2xl shadow p-6 mx-auto">
+  <h1 class="text-2xl font-bold mb-2">Guided 3‑Shot Capture</h1>
+  <p class="text-gray-600 mb-4">We will take 3 photos: <strong>front</strong>, <strong>left</strong>, and <strong>right</strong>. Keep your face inside the frame.</p>
+  <form method="post">
+    <button class="btn btn-primary">Start Guided Capture</button>
+  </form>
+  <p class="text-sm text-gray-500 mt-3">If running locally, an OpenCV window will show prompts. Press <kbd>Esc</kbd> to abort.</p>
+</div>
+{% endblock %}

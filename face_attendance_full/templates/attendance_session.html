@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Session {{ session.id }}{% endblock %}
+{% block content %}
+<div class="bg-white rounded-2xl shadow p-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold">Attendance Session #{{ session.id }}</h1>
+      <div class="text-gray-500">
+        Course: {{ course.title }} ({{ course.code }}){% if section %} — Section {{ section.name }}{% endif %}
+      </div>
+    </div>
+    <div class="flex gap-2">
+      <a class="btn btn-outline-secondary" href="{{ url_for('attendance.manual', session_id=session.id) }}">Manual Attendance</a>
+      <form action="{{ url_for('attendance.close', session_id=session.id) }}" method="post">
+        <button class="btn btn-danger">Close Session</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="video-container bg-black mt-4">
+  <img id="stream" class="w-full" src="{{ url_for('attendance.video', session_id=session.id) }}?debug=1" onerror="document.getElementById('diag').classList.remove('hidden')">
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mt-4">
+  <div class="lg:col-span-3"></div>
+  <div class="bg-white rounded-2xl shadow p-4">
+    <h2 class="text-lg font-semibold mb-2">Live Status</h2>
+    <div id="presentList" class="text-sm text-gray-700">Loading…</div>
+  </div>
+</div>
+<script>
+  (function poll() {
+    fetch('{{ url_for("attendance.present_json", session_id=session.id) }}')
+      .then(r => r.json())
+      .then(d => {
+        const el = document.getElementById('presentList');
+        el.innerHTML = `
+          <div><strong>Present:</strong> ${d.present_names.join(', ') || '—'}</div>
+          <div><strong>Remaining:</strong> ${d.remaining_names.join(', ') || '—'}</div>
+        `;
+      })
+      .catch(()=>{})
+      .finally(()=> setTimeout(poll, 2500));
+  })();
+</script>
+
+
+<p class="text-sm text-gray-500 mt-2">Green box = recognized (name + confidence), Red = unknown.</p>
+<div id="diag" class="hidden mt-3 alert alert-warning">
+  Stream failed. <a href="{{ url_for('attendance.camera_diag') }}" target="_blank">Run camera diagnostics</a> to see which backend/index to use.
+</div>
+{% endblock %}

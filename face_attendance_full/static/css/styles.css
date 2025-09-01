@@ -1,0 +1,4 @@
+.badge { padding: 0.25rem 0.5rem; border-radius: 9999px; }
+.badge.present { background: #DCFCE7; color: #166534; }
+.badge.absent { background: #FEE2E2; color: #991B1B; }
+.video-container { max-width: 900px; margin: 0 auto; border-radius: 1rem; overflow: hidden; }

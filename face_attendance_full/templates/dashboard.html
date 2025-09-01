@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-bold">Dashboard</h1>
+  <div class="flex gap-2">
+    <a href="{{ url_for('courses.create_course') }}" class="btn btn-success">+ New Course</a>
+    <a href="{{ url_for('courses.enroll_student') }}" class="btn btn-outline-secondary">Enroll Student</a>
+    <form action="{{ url_for('courses.train_model') }}" method="post" class="inline">
+      <button class="btn btn-outline-primary">Train Model</button>
+    </form>
+    <a href="{{ url_for('attendance.start') }}" class="btn btn-primary">Start Attendance</a>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+  {% for c in courses %}
+  <a href="{{ url_for('courses.course_detail', course_id=c.id) }}" class="block bg-white rounded-2xl p-5 shadow hover:shadow-lg transition">
+    <div class="text-gray-500 text-sm">{{ c.code }}</div>
+    <div class="text-xl font-semibold">{{ c.title }}</div>
+  </a>
+  {% else %}
+  <div class="col-span-3 bg-white rounded-2xl p-5 shadow">
+    No courses yet. Create one!
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
